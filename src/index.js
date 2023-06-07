@@ -1,7 +1,7 @@
-import express from "express";
-import bodyParser from "body-parser";
-import viewEngine from "./configs/viewEngine";
-import webRoutes from "./routes/web";
+const express = require("express");
+const bodyParser = require("body-parser");
+const viewEngine = require("./configs/viewEngine");
+const webRoutes = require("./routes/web");
 
 const app = express();
 const port = process.env.PORT || 4398;
