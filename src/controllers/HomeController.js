@@ -108,6 +108,8 @@ function handlePostback(sender_psid, received_postback) {
     response = { text: "Thanks!" };
   } else if (payload === "no") {
     response = { text: "Oops, try sending another image." };
+  } else if (payload === "GET_STARTED") {
+    response = { text: "Welcome Tai Sao to my chat bot website!" };
   }
   // Send the message to acknowledge the postback
   callSendAPI(sender_psid, response);
@@ -115,7 +117,6 @@ function handlePostback(sender_psid, received_postback) {
 
 // Sends response messages via the Send API
 function callSendAPI(sender_psid, response) {
-  // Construct the message body
   let request_body = {
     recipient: {
       id: sender_psid,
@@ -141,8 +142,35 @@ function callSendAPI(sender_psid, response) {
   );
 }
 
+async function setupProfile(req, res) {
+  const request_body = {
+    get_started: { payload: "GET_STARTED" },
+    whitelisted_domains: ["https://chat-bot-facebook.onrender.com/"],
+  };
+
+  // Send the HTTP request to the Messenger Platform
+  await request(
+    {
+      uri: "https://graph.facebook.com/v17.0/me/messenger_profile",
+      qs: { access_token: process.env.PAGE_ACCESS_TOKEN },
+      method: "POST",
+      json: request_body,
+    },
+    (err, res, body) => {
+      if (!err) {
+        console.log("Success: ", body);
+      } else {
+        console.error("Error setup profile: " + err);
+      }
+    }
+  );
+
+  return res.send("Setup profile success!");
+}
+
 module.exports = {
   getHomePage,
   postWebhook,
   getMessageWebhook,
+  setupProfile,
 };
