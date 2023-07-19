@@ -22,25 +22,26 @@ const callSendAPI = (sender_psid, response) => {
 };
 
 const getUserName = async (sender_psid) => {
-  axios({
-    url: `https://graph.facebook.com/${sender_psid}`,
-    params: {
-      fields: "first_name,last_name,profile_pic",
-      access_token: process.env.PAGE_ACCESS_TOKEN,
-    },
-    method: "GET",
-  })
-    .then((res) => {
-      const result = JSON.parse(res.data);
-    })
-    .catch((err) => {
-      console.error("Unable to send message:" + err);
+  try {
+    const res = await axios({
+      url: `https://graph.facebook.com/${sender_psid}`,
+      params: {
+        fields: "first_name,last_name,profile_pic",
+        access_token: process.env.PAGE_ACCESS_TOKEN,
+      },
+      method: "GET",
     });
+    return `${res.data.first_name} ${res.data.last_name}`;
+  } catch (err) {
+    console.error("Unable to send message:" + err);
+  }
 };
 
 const handleGetStarted = async (sender_psid) => {
-  const response = { text: "Welcome Tai Sao to my chat bot website!" };
-  await callSendAPI(sender_psid, response);
+  const username = await getUserName(sender_psid);
+  await callSendAPI(sender_psid, {
+    text: `Welcome ${username} to my chat bot website!`,
+  });
 };
 
-module.exports = { getUserName, handleGetStarted };
+module.exports = { handleGetStarted };
