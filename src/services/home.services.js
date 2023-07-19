@@ -39,11 +39,13 @@ const getUserName = async (sender_psid) => {
 
 const handleGetStarted = async (sender_psid) => {
   const username = await getUserName(sender_psid);
-  await callSendAPI(sender_psid, getStartedMessageTemplate("TEXT", username));
-  await callSendAPI(sender_psid, getStartedMessageTemplate("GENERIC"));
+  await Promise.all[
+    (callSendAPI(sender_psid, getStartedMessageTemplate("TEXT", { username })),
+    callSendAPI(sender_psid, getStartedMessageTemplate("GENERIC")))
+  ];
 };
 
-const getStartedMessageTemplate = (type, username) => {
+const getStartedMessageTemplate = (type, { username }) => {
   if (type === "TEXT") {
     return {
       text: `Welcome ${username} to my chat bot website!`,
