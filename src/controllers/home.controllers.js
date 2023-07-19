@@ -106,6 +106,7 @@ const handlePostback = async (sender_psid, received_postback) => {
     case "no":
       response = { text: "Oops, try sending another image." };
       break;
+    case "RESTART_BOT":
     case "GET_STARTED":
       await HomeServices.handleGetStarted(sender_psid);
     default:
@@ -138,8 +139,8 @@ const callSendAPI = (sender_psid, response) => {
     });
 };
 
-const setupProfile = async (req, res) => {
-  await axios({
+const setupProfile = (req, res) => {
+  axios({
     url: "https://graph.facebook.com/v17.0/me/messenger_profile",
     params: { access_token: process.env.PAGE_ACCESS_TOKEN },
     method: "POST",
@@ -149,18 +150,16 @@ const setupProfile = async (req, res) => {
     },
   })
     .then(() => {
-      console.log("Success: ", body);
+      res.send("Setup profile success!");
     })
     .catch(() => {
-      console.error("Error setup profile: " + err);
+      res.send("Error setup profile: " + err);
     });
-
-  return res.send("Setup profile success!");
 };
 
-const setupPersistentMenu = async () => {
-  await axios({
-    url: "https://graph.facebook.com/v17.0/me/custom_user_settings",
+const setupPersistentMenu = (req, res) => {
+  axios({
+    url: "https://graph.facebook.com/v17.0/me/messenger_profile",
     params: { access_token: process.env.PAGE_ACCESS_TOKEN },
     method: "POST",
     data: {
@@ -186,19 +185,22 @@ const setupPersistentMenu = async () => {
               title: "Call girl",
               payload: "CALL_GIRL",
             },
+            {
+              type: "postback",
+              title: "Restart bot",
+              payload: "RESTART_BOT",
+            },
           ],
         },
       ],
     },
   })
     .then(() => {
-      console.log("Success: ", body);
+      res.send("Setup persistent menu success!");
     })
     .catch(() => {
-      console.error("Error setup profile: " + err);
+      res.send("Error setup persistent menu: " + err);
     });
-
-  return res.send("Setup profile success!");
 };
 
 module.exports = {
