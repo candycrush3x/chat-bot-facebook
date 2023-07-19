@@ -1,5 +1,7 @@
 require("dotenv").config();
-const request = require("request");
+const axios = require("axios");
+
+const HomeServices = require("../services/home.services");
 
 const getHomePage = (req, res) => {
   return res.render("homepage.ejs");
@@ -49,14 +51,10 @@ const getMessageWebhook = (req, res) => {
   }
 };
 
-// Handles messages events
 function handleMessage(sender_psid, received_message) {
   let response;
 
-  // Checks if the message contains text
   if (received_message.text) {
-    // Create the payload for a basic text message, which
-    // will be added to the body of our request to the Send API
     response = {
       text: `You sent the message: "${received_message.text}". Now send me an attachment!`,
     };
@@ -97,76 +95,68 @@ function handleMessage(sender_psid, received_message) {
 }
 
 // Handles messaging_postbacks events
-function handlePostback(sender_psid, received_postback) {
+const handlePostback = async (sender_psid, received_postback) => {
+  const payload = received_postback.payload;
   let response;
 
-  // Get the payload for the postback
-  let payload = received_postback.payload;
-
-  // Set the response based on the postback payload
-  if (payload === "yes") {
-    response = { text: "Thanks!" };
-  } else if (payload === "no") {
-    response = { text: "Oops, try sending another image." };
-  } else if (payload === "GET_STARTED") {
-    response = { text: "Welcome Tai Sao to my chat bot website!" };
+  switch (payload) {
+    case "yes":
+      response = { text: "Thanks!" };
+      break;
+    case "no":
+      response = { text: "Oops, try sending another image." };
+      break;
+    case "GET_STARTED":
+      await HomeServices.handleGetStarted(sender_psid);
+    default:
+      response = {
+        text: `Oops! I don't have any response for ${payload} postback!`,
+      };
+      break;
   }
-  // Send the message to acknowledge the postback
-  callSendAPI(sender_psid, response);
-}
 
-// Sends response messages via the Send API
-function callSendAPI(sender_psid, response) {
-  let request_body = {
-    recipient: {
-      id: sender_psid,
+  // callSendAPI(sender_psid, response);
+};
+
+const callSendAPI = (sender_psid, response) => {
+  axios({
+    url: "https://graph.facebook.com/v17.0/me/messages",
+    params: { access_token: process.env.PAGE_ACCESS_TOKEN },
+    method: "POST",
+    data: {
+      recipient: {
+        id: sender_psid,
+      },
+      message: response,
     },
-    message: response,
-  };
+  })
+    .then((res) => {
+      console.log("message sent!");
+    })
+    .catch(() => {
+      console.error("Unable to send message:" + err);
+    });
+};
 
-  // Send the HTTP request to the Messenger Platform
-  request(
-    {
-      uri: "https://graph.facebook.com/v17.0/me/messages",
-      qs: { access_token: process.env.PAGE_ACCESS_TOKEN },
-      method: "POST",
-      json: request_body,
+const setupProfile = async (req, res) => {
+  await axios({
+    url: "https://graph.facebook.com/v17.0/me/messenger_profile",
+    params: { access_token: process.env.PAGE_ACCESS_TOKEN },
+    method: "POST",
+    data: {
+      get_started: { payload: "GET_STARTED" },
+      whitelisted_domains: ["https://chat-bot-facebook.onrender.com/"],
     },
-    (err, res, body) => {
-      if (!err) {
-        console.log("message sent!");
-      } else {
-        console.error("Unable to send message:" + err);
-      }
-    }
-  );
-}
-
-async function setupProfile(req, res) {
-  const request_body = {
-    get_started: { payload: "GET_STARTED" },
-    whitelisted_domains: ["https://chat-bot-facebook.onrender.com/"],
-  };
-
-  // Send the HTTP request to the Messenger Platform
-  await request(
-    {
-      uri: "https://graph.facebook.com/v17.0/me/messenger_profile",
-      qs: { access_token: process.env.PAGE_ACCESS_TOKEN },
-      method: "POST",
-      json: request_body,
-    },
-    (err, res, body) => {
-      if (!err) {
-        console.log("Success: ", body);
-      } else {
-        console.error("Error setup profile: " + err);
-      }
-    }
-  );
+  })
+    .then(() => {
+      console.log("Success: ", body);
+    })
+    .catch(() => {
+      console.error("Error setup profile: " + err);
+    });
 
   return res.send("Setup profile success!");
-}
+};
 
 module.exports = {
   getHomePage,

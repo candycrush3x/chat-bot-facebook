@@ -1,13 +1,13 @@
 const express = require("express");
-const homeController = require("../controllers/HomeController");
+const HomeController = require("../controllers/home.controllers");
 
 let router = express.Router();
 
 let initWebRoutes = (app) => {
-  router.get("/", homeController.getHomePage);
-  router.post("/setup-profile", homeController.setupProfile);
-  router.post("/messaging-webhook", homeController.postWebhook);
-  router.get("/messaging-webhook", homeController.getMessageWebhook);
+  router.get("/", HomeController.getHomePage);
+  router.post("/setup-profile", HomeController.setupProfile);
+  router.post("/messaging-webhook", HomeController.postWebhook);
+  router.get("/messaging-webhook", HomeController.getMessageWebhook);
   return app.use("/", router);
 };
 
