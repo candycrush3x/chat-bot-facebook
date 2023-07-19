@@ -51,7 +51,7 @@ const getMessageWebhook = (req, res) => {
   }
 };
 
-function handleMessage(sender_psid, received_message) {
+const handleMessage = (sender_psid, received_message) => {
   let response;
 
   if (received_message.text) {
@@ -92,9 +92,8 @@ function handleMessage(sender_psid, received_message) {
 
   // Send the response message
   callSendAPI(sender_psid, response);
-}
+};
 
-// Handles messaging_postbacks events
 const handlePostback = async (sender_psid, received_postback) => {
   const payload = received_postback.payload;
   let response;
@@ -103,12 +102,16 @@ const handlePostback = async (sender_psid, received_postback) => {
     case "yes":
       response = { text: "Thanks!" };
       break;
+
     case "no":
       response = { text: "Oops, try sending another image." };
       break;
+
     case "RESTART_BOT":
     case "GET_STARTED":
       await HomeServices.handleGetStarted(sender_psid);
+      break;
+
     default:
       response = {
         text: `Oops! I don't have any response for ${payload} postback!`,
