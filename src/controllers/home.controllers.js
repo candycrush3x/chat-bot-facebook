@@ -158,9 +158,12 @@ const setupProfile = async (req, res) => {
   return res.send("Setup profile success!");
 };
 
+const setupPersistentMenu = async () => {};
+
 module.exports = {
   getHomePage,
   postWebhook,
   getMessageWebhook,
   setupProfile,
+  setupPersistentMenu,
 };

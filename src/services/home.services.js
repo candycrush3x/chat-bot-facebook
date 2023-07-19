@@ -39,9 +39,44 @@ const getUserName = async (sender_psid) => {
 
 const handleGetStarted = async (sender_psid) => {
   const username = await getUserName(sender_psid);
-  await callSendAPI(sender_psid, {
-    text: `Welcome ${username} to my chat bot website!`,
-  });
+  await callSendAPI(sender_psid, getStartedMessageTemplate("TEXT"));
+  await callSendAPI(sender_psid, getStartedMessageTemplate("GENERIC"));
+};
+
+const getStartedMessageTemplate = (type) => {
+  if (type === "TEXT") {
+    return {
+      text: `Welcome ${username} to my chat bot website!`,
+    };
+  }
+
+  return {
+    attachment: {
+      type: "template",
+      payload: {
+        template_type: "generic",
+        elements: [
+          {
+            image_url: "https://bit.ly/get-started-image",
+            title: "Welcome to my chat bot!",
+            subtitle: "The below buttons are my services we have",
+            buttons: [
+              {
+                type: "postback",
+                title: "Start Chatting",
+                payload: "START_CHATTING",
+              },
+              {
+                type: "postback",
+                title: "Call girl",
+                payload: "CALL_GIRL",
+              },
+            ],
+          },
+        ],
+      },
+    },
+  };
 };
 
 module.exports = { handleGetStarted };
