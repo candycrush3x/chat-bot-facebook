@@ -158,7 +158,48 @@ const setupProfile = async (req, res) => {
   return res.send("Setup profile success!");
 };
 
-const setupPersistentMenu = async () => {};
+const setupPersistentMenu = async () => {
+  await axios({
+    url: "https://graph.facebook.com/v17.0/me/custom_user_settings",
+    params: { access_token: process.env.PAGE_ACCESS_TOKEN },
+    method: "POST",
+    data: {
+      persistent_menu: [
+        {
+          locale: "default",
+          composer_input_disabled: false,
+          call_to_actions: [
+            {
+              type: "web_url",
+              title: "Youtube chanel",
+              url: "https://www.youtube.com/",
+              webview_height_ratio: "full",
+            },
+            {
+              type: "web_url",
+              title: "Shop now",
+              url: "https://www.originalcoastclothing.com/",
+              webview_height_ratio: "full",
+            },
+            {
+              type: "postback",
+              title: "Call girl",
+              payload: "CALL_GIRL",
+            },
+          ],
+        },
+      ],
+    },
+  })
+    .then(() => {
+      console.log("Success: ", body);
+    })
+    .catch(() => {
+      console.error("Error setup profile: " + err);
+    });
+
+  return res.send("Setup profile success!");
+};
 
 module.exports = {
   getHomePage,
